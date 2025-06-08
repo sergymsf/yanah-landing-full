@@ -8,13 +8,13 @@ import Footer from './components/Footer';
 
 export default function App() {
   return (
-    <>
+    <div className="transition-colors duration-500 bg-white dark:bg-black text-black dark:text-white">
       <Navbar />
       <Hero />
-      <Categories />
       <FeaturedVideos />
+      <Categories />
       <SubmitSection />
       <Footer />
-    </>
+    </div>
   );
 }
