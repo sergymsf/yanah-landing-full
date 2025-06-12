@@ -3,8 +3,12 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Categories from './components/Categories';
 import FeaturedVideos from './components/FeaturedVideos';
+import VideoUploadForm from './components/VideoUploadForm';
 import SubmitSection from './components/SubmitSection';
 import Footer from './components/Footer';
+import { useEffect } from "react";
+import { db } from "./firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function App() {
   return (
@@ -13,6 +17,7 @@ export default function App() {
       <Hero />
       <FeaturedVideos />
       <Categories />
+      <VideoUploadForm />
       <SubmitSection />
       <Footer />
     </div>

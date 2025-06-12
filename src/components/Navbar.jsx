@@ -22,7 +22,7 @@ export default function Navbar() {
     <nav className="flex items-center justify-between p-4 bg-green-800 dark:bg-gray-900 shadow-md transition-colors duration-500">
       <img src={logo} alt="Yanah Logo" className="h-12" />
 
-      <ul className="hidden md:flex space-x-6 font-semibold text-[#f6eee0] dark:text-green-100">
+      <ul className="hidden md:flex space-x-6 font-semibold text-[#f6eee0]">
         <li><a href="#categories">Categories</a></li>
         <li><a href="#featured">Top Videos</a></li>
         <li><a href="#submit">Submit</a></li>
@@ -31,7 +31,7 @@ export default function Navbar() {
       {/* Theme Toggle Icon */}
       <button
         onClick={() => setDark(!dark)}
-        className="ml-4 p-2 rounded-full text-[#f6eee0] dark:text-gray-200 hover:bg-green-900 dark:hover:bg-gray-800 transition-colors duration-300"
+        className="ml-4 p-2 rounded-full text-[#f6eee0] hover:bg-green-900 dark:hover:bg-gray-800 transition-colors duration-300"
         aria-label="Toggle dark mode"
       >
         {dark ? <Sun size={22} /> : <Moon size={22} />}
