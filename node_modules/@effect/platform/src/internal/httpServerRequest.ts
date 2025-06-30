@@ -229,7 +229,7 @@ class ServerRequestImpl extends Inspectable.Class implements ServerRequest.HttpS
     return this.remoteAddressOverride ? Option.some(this.remoteAddressOverride) : Option.none()
   }
   get headers(): Headers.Headers {
-    this.headersOverride ??= Headers.fromInput(this.source.headers)
+    this.headersOverride ??= Headers.fromInput(this.source.headers as any)
     return this.headersOverride
   }
 
@@ -366,7 +366,7 @@ export const toURL = (self: ServerRequest.HttpServerRequest): Option.Option<URL>
   const protocol = self.headers["x-forwarded-proto"] === "https" ? "https" : "http"
   try {
     return Option.some(new URL(self.url, `${protocol}://${host}`))
-  } catch (_) {
+  } catch {
     return Option.none()
   }
 }

@@ -8,12 +8,15 @@ import * as Option from "effect/Option"
 import { type Pipeable, pipeArguments } from "effect/Pipeable"
 import * as Predicate from "effect/Predicate"
 import * as Schema from "effect/Schema"
+import type * as Stream from "effect/Stream"
 import type * as Types from "effect/Types"
 import type * as HttpApiMiddleware from "./HttpApiMiddleware.js"
 import * as HttpApiSchema from "./HttpApiSchema.js"
 import type { HttpMethod } from "./HttpMethod.js"
 import * as HttpRouter from "./HttpRouter.js"
+import type { HttpServerRequest } from "./HttpServerRequest.js"
 import type { HttpServerResponse } from "./HttpServerResponse.js"
+import type * as Multipart from "./Multipart.js"
 
 /**
  * @since 1.0.0
@@ -402,8 +405,34 @@ export declare namespace HttpApiEndpoint {
   > ?
       & ([_Path] extends [never] ? {} : { readonly path: _Path })
       & ([_UrlParams] extends [never] ? {} : { readonly urlParams: _UrlParams })
-      & ([_Payload] extends [never] ? {} : { readonly payload: _Payload })
+      & ([_Payload] extends [never] ? {}
+        : _Payload extends Brand<HttpApiSchema.MultipartStreamTypeId> ?
+          { readonly payload: Stream.Stream<Multipart.Part, Multipart.MultipartError> }
+        : { readonly payload: _Payload })
       & ([_Headers] extends [never] ? {} : { readonly headers: _Headers })
+      & { readonly request: HttpServerRequest }
+    : {}
+
+  /**
+   * @since 1.0.0
+   * @category models
+   */
+  export type RequestRaw<Endpoint extends Any> = Endpoint extends HttpApiEndpoint<
+    infer _Name,
+    infer _Method,
+    infer _Path,
+    infer _UrlParams,
+    infer _Payload,
+    infer _Headers,
+    infer _Success,
+    infer _Error,
+    infer _R,
+    infer _RE
+  > ?
+      & ([_Path] extends [never] ? {} : { readonly path: _Path })
+      & ([_UrlParams] extends [never] ? {} : { readonly urlParams: _UrlParams })
+      & ([_Headers] extends [never] ? {} : { readonly headers: _Headers })
+      & { readonly request: HttpServerRequest }
     : {}
 
   /**
@@ -416,7 +445,9 @@ export declare namespace HttpApiEndpoint {
     & ([Headers] extends [never] ? {} : { readonly headers: Headers })
     & ([Payload] extends [never] ? {}
       : Payload extends infer P ?
-        P extends Brand<HttpApiSchema.MultipartTypeId> ? { readonly payload: FormData } : { readonly payload: P }
+        P extends Brand<HttpApiSchema.MultipartTypeId> | Brand<HttpApiSchema.MultipartStreamTypeId>
+          ? { readonly payload: FormData }
+        : { readonly payload: P }
       : { readonly payload: Payload })
   ) extends infer Req ? keyof Req extends never ? (void | { readonly withResponse?: WithResponse }) :
     Req & { readonly withResponse?: WithResponse } :
@@ -464,15 +495,15 @@ export declare namespace HttpApiEndpoint {
    */
   export type Handler<Endpoint extends Any, E, R> = (
     request: Types.Simplify<Request<Endpoint>>
-  ) => Effect<Success<Endpoint>, Error<Endpoint> | E, R>
+  ) => Effect<Success<Endpoint> | HttpServerResponse, Error<Endpoint> | E, R>
 
   /**
    * @since 1.0.0
    * @category models
    */
-  export type HandlerResponse<Endpoint extends Any, E, R> = (
-    request: Types.Simplify<Request<Endpoint>>
-  ) => Effect<HttpServerResponse, Error<Endpoint> | E, R>
+  export type HandlerRaw<Endpoint extends Any, E, R> = (
+    request: Types.Simplify<RequestRaw<Endpoint>>
+  ) => Effect<Success<Endpoint> | HttpServerResponse, Error<Endpoint> | E, R>
 
   /**
    * @since 1.0.0
@@ -500,7 +531,7 @@ export declare namespace HttpApiEndpoint {
    * @since 1.0.0
    * @category models
    */
-  export type HandlerResponseWithName<Endpoints extends Any, Name extends string, E, R> = HandlerResponse<
+  export type HandlerRawWithName<Endpoints extends Any, Name extends string, E, R> = HandlerRaw<
     WithName<Endpoints, Name>,
     E,
     R
@@ -585,15 +616,16 @@ export declare namespace HttpApiEndpoint {
    * @category models
    */
   export type ValidateParams<
-    Schemas extends ReadonlyArray<HttpApiSchema.AnyString>,
-    Prev extends HttpApiSchema.AnyString = never
+    Schemas extends ReadonlyArray<Schema.Schema.Any | Schema.PropertySignature.Any>,
+    Prev extends (Schema.Schema.Any | Schema.PropertySignature.Any) = never
   > = Schemas extends [
-    infer Head extends HttpApiSchema.AnyString,
-    ...infer Tail extends ReadonlyArray<HttpApiSchema.AnyString>
+    infer Head extends (Schema.Schema.Any | Schema.PropertySignature.Any),
+    ...infer Tail extends ReadonlyArray<Schema.Schema.Any | Schema.PropertySignature.Any>
   ] ? [
       Head extends HttpApiSchema.Param<infer _Name, infer _S>
-        ? HttpApiSchema.Param<_Name, any> extends Prev ? `Duplicate param :${_Name}`
-        : Head :
+        ? HttpApiSchema.Param<_Name, any> extends Prev ? `Duplicate param: ${_Name}`
+        : [Schema.Schema.Encoded<Head> & {}] extends [string] ? Head
+        : `Must be encodeable to string: ${_Name}` :
         Head,
       ...ValidateParams<Tail, Prev | Head>
     ]
@@ -661,28 +693,44 @@ export declare namespace HttpApiEndpoint {
    * @since 1.0.0
    * @category models
    */
-  export type PathEntries<Schemas extends ReadonlyArray<HttpApiSchema.AnyString>> =
+  export type PathEntries<Schemas extends ReadonlyArray<Schema.Schema.Any | Schema.PropertySignature.Any>> =
     Extract<keyof Schemas, string> extends infer K ?
       K extends keyof Schemas ? Schemas[K] extends HttpApiSchema.Param<infer _Name, infer _S> ? [_Name, _S] :
-        Schemas[K] extends HttpApiSchema.AnyString ? [K, Schemas[K]]
+        Schemas[K] extends (Schema.Schema.Any | Schema.PropertySignature.Any) ? [K, Schemas[K]]
         : never
       : never
       : never
+
+  type OptionalTypePropertySignature =
+    | Schema.PropertySignature<"?:", any, PropertyKey, Schema.PropertySignature.Token, any, boolean, unknown>
+    | Schema.PropertySignature<"?:", any, PropertyKey, Schema.PropertySignature.Token, never, boolean, unknown>
+    | Schema.PropertySignature<"?:", never, PropertyKey, Schema.PropertySignature.Token, any, boolean, unknown>
+    | Schema.PropertySignature<"?:", never, PropertyKey, Schema.PropertySignature.Token, never, boolean, unknown>
 
   /**
    * @since 1.0.0
    * @category models
    */
-  export type ExtractPath<Schemas extends ReadonlyArray<HttpApiSchema.AnyString>> = {
-    readonly [Entry in PathEntries<Schemas> as Entry[0]]: Entry[1]["Type"]
-  }
+  export type ExtractPath<Schemas extends ReadonlyArray<Schema.Schema.Any | Schema.PropertySignature.Any>> =
+    Schema.Simplify<
+      & {
+        readonly [
+          Entry in Extract<PathEntries<Schemas>, [any, OptionalTypePropertySignature]> as Entry[0]
+        ]?: Schema.Schema.Type<Entry[1]>
+      }
+      & {
+        readonly [
+          Entry in Exclude<PathEntries<Schemas>, [any, OptionalTypePropertySignature]> as Entry[0]
+        ]: Schema.Schema.Type<Entry[1]>
+      }
+    >
 
   /**
    * @since 1.0.0
    * @category models
    */
   export type Constructor<Name extends string, Method extends HttpMethod> = <
-    const Schemas extends ReadonlyArray<HttpApiSchema.AnyString>
+    const Schemas extends ReadonlyArray<Schema.Schema.Any | Schema.PropertySignature.Any>
   >(
     segments: TemplateStringsArray,
     ...schemas: ValidateParams<Schemas>
@@ -695,7 +743,7 @@ export declare namespace HttpApiEndpoint {
     never,
     void,
     never,
-    Schemas[number]["Context"]
+    Schema.Schema.Context<Schemas[number]>
   >
 }
 
@@ -829,16 +877,21 @@ export const make = <Method extends HttpMethod>(method: Method): {
         middlewares: new Set()
       })
     }
-    return (segments: TemplateStringsArray, ...schemas: ReadonlyArray<HttpApiSchema.AnyString>) => {
-      let path = segments[0] as PathSegment
+    return (
+      segments: TemplateStringsArray,
+      ...schemas: ReadonlyArray<Schema.Schema.Any | Schema.PropertySignature.Any>
+    ) => {
+      let path = segments[0].replace(":", "::") as PathSegment
       let pathSchema = Option.none<Schema.Schema.Any>()
       if (schemas.length > 0) {
-        const obj: Record<string, Schema.Schema.Any> = {}
+        const obj: Record<string, Schema.Schema.Any | Schema.PropertySignature.Any> = {}
         for (let i = 0; i < schemas.length; i++) {
           const schema = schemas[i]
           const key = HttpApiSchema.getParam(schema.ast) ?? String(i)
+          const optional = schema.ast._tag === "PropertySignatureTransformation" && schema.ast.from.isOptional ||
+            schema.ast._tag === "PropertySignatureDeclaration" && schema.ast.isOptional
           obj[key] = schema
-          path += `:${key}${segments[i + 1]}`
+          path += `:${key}${optional ? "?" : ""}${segments[i + 1].replace(":", "::")}`
         }
         pathSchema = Option.some(Schema.Struct(obj))
       }

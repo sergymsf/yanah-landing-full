@@ -1,4 +1,5 @@
 import * as Effect from "effect/Effect"
+import * as Either from "effect/Either"
 import { dual } from "effect/Function"
 import * as Inspectable from "effect/Inspectable"
 import * as Option from "effect/Option"
@@ -373,13 +374,17 @@ export const removeHash = (self: ClientRequest.HttpClientRequest): ClientRequest
   )
 
 /** @internal */
+export const toUrl = (self: ClientRequest.HttpClientRequest): Option.Option<URL> =>
+  Either.getRight(UrlParams.makeUrl(self.url, self.urlParams, self.hash))
+
+/** @internal */
 export const setBody = dual<
   (body: Body.HttpBody) => (self: ClientRequest.HttpClientRequest) => ClientRequest.HttpClientRequest,
   (self: ClientRequest.HttpClientRequest, body: Body.HttpBody) => ClientRequest.HttpClientRequest
 >(2, (self, body) => {
   let headers = self.headers
-  if (body._tag === "Empty") {
-    headers = Headers.remove(Headers.remove(headers, "Content-Type"), "Content-length")
+  if (body._tag === "Empty" || body._tag === "FormData") {
+    headers = Headers.remove(headers, ["Content-type", "Content-length"])
   } else {
     const contentType = body.contentType
     if (contentType) {
@@ -505,6 +510,12 @@ export const bodyFormData = dual<
   (body: FormData) => (self: ClientRequest.HttpClientRequest) => ClientRequest.HttpClientRequest,
   (self: ClientRequest.HttpClientRequest, body: FormData) => ClientRequest.HttpClientRequest
 >(2, (self, body) => setBody(self, internalBody.formData(body)))
+
+/** @internal */
+export const bodyFormDataRecord = dual<
+  (entries: Body.FormDataInput) => (self: ClientRequest.HttpClientRequest) => ClientRequest.HttpClientRequest,
+  (self: ClientRequest.HttpClientRequest, entries: Body.FormDataInput) => ClientRequest.HttpClientRequest
+>(2, (self, entries) => setBody(self, internalBody.formDataRecord(entries)))
 
 /** @internal */
 export const bodyStream = dual<

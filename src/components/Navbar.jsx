@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import logo from "../assets/yanah.png";
 import { Moon, Sun } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const [dark, setDark] = useState(() => {
@@ -27,6 +28,10 @@ export default function Navbar() {
         <li><a href="#featured">Top Videos</a></li>
         <li><a href="#submit">Submit</a></li>
       </ul>
+      
+      <Link to="/login">
+        <button className="md:flex space-x-6 font-semibold text-[#f6eee0]">Login</button>
+      </Link>
 
       {/* Theme Toggle Icon */}
       <button

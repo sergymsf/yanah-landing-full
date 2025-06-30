@@ -1,25 +1,21 @@
 import React from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Categories from './components/Categories';
-import FeaturedVideos from './components/FeaturedVideos';
-import VideoUploadForm from './components/VideoUploadForm';
-import SubmitSection from './components/SubmitSection';
-import Footer from './components/Footer';
+import LoginPage from './components/LoginPage';
+import LandingPage from './components/LandingPage';
 import { useEffect } from "react";
 import { db } from "./firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-export default function App() {
+function App() {
   return (
-    <div className="transition-colors duration-500 bg-white dark:bg-black text-black dark:text-white">
-      <Navbar />
-      <Hero />
-      <FeaturedVideos />
-      <Categories />
-      <VideoUploadForm />
-      <SubmitSection />
-      <Footer />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
+    </Router>
   );
 }
+
+export default App;
+
