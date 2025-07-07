@@ -1,88 +1,179 @@
-import { useEffect } from 'react';
-import yanah from '../assets/yanah.png';
+import React, { useState } from 'react';
 
-export default function LoginPage() {
-  useEffect(() => {
-    const container = document.getElementById("container");
-    const registerBtn = document.getElementById("register");
-    const loginBtn = document.getElementById("login");
+export default function SignInUp() {
+  const [rightPanelActive, setRightPanelActive] = useState(false);
 
-    if (!container || !registerBtn || !loginBtn) return;
-
-    const handleRegister = () => container.classList.add("active");
-    const handleLogin = () => container.classList.remove("active");
-
-    registerBtn.addEventListener("click", handleRegister);
-    loginBtn.addEventListener("click", handleLogin);
-
-    return () => {
-      registerBtn.removeEventListener("click", handleRegister);
-      loginBtn.removeEventListener("click", handleLogin);
-    };
-  }, []);
+  const handleSignUp = () => setRightPanelActive(true);
+  const handleSignIn = () => setRightPanelActive(false);
 
   return (
-    <div className="min-h-screen transition-colors duration-500 bg-[#f6eee0] dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center relative">
-      <a className="fixed top-5 left-1/2 transform -translate-x-1/2" href="/">
-        <img src={yanah} alt="T-Shirt" className="h-20 w-20 hover:scale-110 transition-transform duration-500" />
-      </a>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
 
-      <div
-        id="container"
-        className="relative bg-green-800 dark:bg-gray-800 rounded-3xl shadow-lg overflow-hidden w-[50%] max-w-full min-w-[800px] min-h-[480px] grid"
-      >
-        {/* Sign Up Form */}
-        <div className="absolute top-0 left-0 w-1/2 h-full transition-all duration-500 form-container sign-up">
-          <form className="flex flex-col items-center justify-center p-10 h-full">
-            <h1 className="text-2xl mb-2">Create Account</h1>
-            <div className="flex gap-2 text-2xl my-4">
-              <a href="#" className="border border-gray-400 dark:border-gray-600 rounded p-2"><i className="fa-brands fa-google-plus-g"></i></a>
-              <a href="#" className="border border-gray-400 dark:border-gray-600 rounded p-2"><i className="fa-brands fa-facebook-f"></i></a>
-              <a href="#" className="border border-gray-400 dark:border-gray-600 rounded p-2"><i className="fa-brands fa-github"></i></a>
-              <a href="#" className="border border-gray-400 dark:border-gray-600 rounded p-2"><i className="fa-brands fa-linkedin-in"></i></a>
+        * { box-sizing: border-box; }
+
+        body {
+          background: #f6f5f7;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          font-family: 'Montserrat', sans-serif;
+          height: 100vh;
+          margin: -20px 0 50px;
+        }
+
+        h1 { font-weight: bold; margin: 0; }
+        h2 { text-align: center; }
+        p { font-size: 14px; font-weight: 100; line-height: 20px; letter-spacing: 0.5px; margin: 20px 0 30px; }
+        span { font-size: 12px; }
+        a { color: #333; font-size: 14px; text-decoration: none; margin: 15px 0; }
+
+        button {
+          border-radius: 20px;
+          border: 1px solid #FF4B2B;
+          background-color: #FF4B2B;
+          color: #FFFFFF;
+          font-size: 12px;
+          font-weight: bold;
+          padding: 12px 45px;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          transition: transform 80ms ease-in;
+        }
+
+        button:active { transform: scale(0.95); }
+        button:focus { outline: none; }
+        button.ghost { background-color: transparent; border-color: #FFFFFF; }
+
+        form {
+          background-color: #FFFFFF;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          padding: 0 50px;
+          height: 100%;
+          text-align: center;
+        }
+
+        input {
+          background-color: #eee;
+          border: none;
+          padding: 12px 15px;
+          margin: 8px 0;
+          width: 100%;
+        }
+
+        .container {
+          background-color: #fff;
+          border-radius: 10px;
+          box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+          position: relative;
+          overflow: hidden;
+          width: 768px;
+          max-width: 100%;
+          min-height: 480px;
+        }
+
+        .form-container { position: absolute; top: 0; height: 100%; transition: all 0.6s ease-in-out; }
+        .sign-in-container { left: 0; width: 50%; z-index: 2; }
+        .container.right-panel-active .sign-in-container { transform: translateX(100%); }
+        .sign-up-container { left: 0; width: 50%; opacity: 0; z-index: 1; }
+        .container.right-panel-active .sign-up-container { transform: translateX(100%); opacity: 1; z-index: 5; animation: show 0.6s; }
+
+        @keyframes show {
+          0%, 49.99% { opacity: 0; z-index: 1; }
+          50%, 100% { opacity: 1; z-index: 5; }
+        }
+
+        .overlay-container { position: absolute; top: 0; left: 50%; width: 50%; height: 100%; overflow: hidden; transition: transform 0.6s ease-in-out; z-index: 100; }
+        .container.right-panel-active .overlay-container { transform: translateX(-100%); }
+        .overlay {
+          background: linear-gradient(to right, #FF4B2B, #FF416C);
+          background-repeat: no-repeat;
+          background-size: cover;
+          background-position: 0 0;
+          color: #FFFFFF;
+          position: relative;
+          left: -100%;
+          height: 100%;
+          width: 200%;
+          transform: translateX(0);
+          transition: transform 0.6s ease-in-out;
+        }
+        .container.right-panel-active .overlay { transform: translateX(50%); }
+        .overlay-panel { position: absolute; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 0 40px; text-align: center; top: 0; height: 100%; width: 50%; transform: translateX(0); transition: transform 0.6s ease-in-out; }
+        .overlay-left { transform: translateX(-20%); }
+        .container.right-panel-active .overlay-left { transform: translateX(0); }
+        .overlay-right { right: 0; transform: translateX(0); }
+        .container.right-panel-active .overlay-right { transform: translateX(20%); }
+
+        @media (max-width: 768px) {
+          .container { width: 100%; min-height: 600px; }
+          .form-container, .overlay-container { width: 100%; height: 50%; position: absolute; }
+          .sign-in-container, .sign-up-container { width: 100%; left: 0; transform: translateY(0) !important; }
+          .overlay-container { top: 50%; left: 0; width: 100%; height: 50%; transform: translateY(0) !important; }
+          .overlay { width: 100%; height: 200%; top: -100%; left: 0; transform: translateY(0) !important; }
+          .container.right-panel-active .overlay { transform: translateY(50%) !important; }
+          .overlay-panel { width: 100%; height: 50%; position: absolute; }
+          .overlay-left { top: 0; }
+          .overlay-right { bottom: 0; top: auto; }
+          .container.right-panel-active .sign-in-container { transform: translateY(100%) !important; }
+          .container.right-panel-active .sign-up-container { transform: translateY(0) !important; opacity: 1; z-index: 5; animation: show 0.6s; }
+        }
+      `}</style>
+
+ 
+      <div className={`container ${rightPanelActive ? 'right-panel-active' : ''}`}>
+        <div className="form-container sign-up-container">
+          <form action="#">
+            <h1>Create Account</h1>
+            <div className="social-container">
+              <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
+              <a href="#" className="social"><i className="fab fa-google-plus-g"></i></a>
+              <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a>
             </div>
-            <span className="text-lg mb-2">or use your email for registration</span>
-            <input className="bg-gray-200 dark:bg-gray-700 rounded p-2 w-full mb-2 text-black dark:text-white" type="text" placeholder="Username" required />
-            <input className="bg-gray-200 dark:bg-gray-700 rounded p-2 w-full mb-2 text-black dark:text-white" type="email" placeholder="Email" required />
-            <input className="bg-gray-200 dark:bg-gray-700 rounded p-2 w-full mb-2 text-black dark:text-white" type="password" placeholder="Password" required />
-            <button className="bg-black dark:bg-white text-white dark:text-black uppercase text-sm font-semibold rounded px-8 py-2 mt-2">Create Account</button>
+            <span>or use your email for registration</span>
+            <input type="text" placeholder="Name" />
+            <input type="email" placeholder="Email" />
+            <input type="password" placeholder="Password" />
+            <button>Sign Up</button>
           </form>
         </div>
 
-        {/* Sign In Form */}
-        <div className="absolute top-0 left-0 w-1/2 h-full z-10 transition-all duration-500 form-container sign-in">
-          <form className="flex flex-col items-center justify-center p-10 h-full">
-            <h1 className="text-2xl mb-2">Sign In</h1>
-            <div className="flex gap-2 text-2xl my-4">
-              <a href="#" className="border border-gray-400 dark:border-gray-600 rounded p-2"><i className="fa-brands fa-google-plus-g"></i></a>
-              <a href="#" className="border border-gray-400 dark:border-gray-600 rounded p-2"><i className="fa-brands fa-facebook-f"></i></a>
-              <a href="#" className="border border-gray-400 dark:border-gray-600 rounded p-2"><i className="fa-brands fa-github"></i></a>
-              <a href="#" className="border border-gray-400 dark:border-gray-600 rounded p-2"><i className="fa-brands fa-linkedin-in"></i></a>
+        <div className="form-container sign-in-container">
+          <form action="#">
+            <h1>Sign in</h1>
+            <div className="social-container">
+              <a href="#" className="social"><i className="fab fa-facebook-f"></i></a>
+              <a href="#" className="social"><i className="fab fa-google-plus-g"></i></a>
+              <a href="#" className="social"><i className="fab fa-linkedin-in"></i></a>
             </div>
-            <span className="text-lg mb-2">or use your email password</span>
-            <input className="bg-gray-200 dark:bg-gray-700 rounded p-2 w-full mb-2 text-black dark:text-white" type="text" placeholder="Username" />
-            <input className="bg-gray-200 dark:bg-gray-700 rounded p-2 w-full mb-2 text-black dark:text-white" type="password" placeholder="Password" />
-            <a href="#" className="text-sm text-black dark:text-white">Forget Your Password?</a>
-            <button className="bg-black dark:bg-white text-white dark:text-black uppercase text-sm font-semibold rounded px-8 py-2 mt-2">Sign In</button>
+            <span>or use your account</span>
+            <input type="email" placeholder="Email" />
+            <input type="password" placeholder="Password" />
+            <a href="#">Forgot your password?</a>
+            <button>Sign In</button>
           </form>
         </div>
 
-        {/* Toggle */}
-        <div className="absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all duration-500 z-20">
-          <div className="bg-green-900 dark:bg-gray-900 text-white dark:text-black w-[200%] h-full flex transition-transform duration-500">
-            <div className="w-1/2 flex flex-col items-center justify-center p-8 text-center">
-              <h1 className="text-2xl">Welcome Back!</h1>
-              <p className="text-sm mt-2">Enter your personal details to use all of site features</p>
-              <button id="login" className="mt-4 border border-white dark:border-black rounded px-6 py-2 uppercase text-sm">Sign In</button>
+        <div className="overlay-container">
+          <div className="overlay">
+            <div className="overlay-panel overlay-left">
+              <h1>Welcome Back!</h1>
+              <p>To keep connected with us please login with your personal info</p>
+              <button className="ghost" onClick={handleSignIn}>Sign In</button>
             </div>
-            <div className="w-1/2 flex flex-col items-center justify-center p-8 text-center">
-              <h1 className="text-2xl">Hello, Friend!</h1>
-              <p className="text-sm mt-2">Register with your personal details to use all of site features</p>
-              <button id="register" className="mt-4 border border-white dark:border-black rounded px-6 py-2 uppercase text-sm">Create Account</button>
+            <div className="overlay-panel overlay-right">
+              <h1>Hello, Friend!</h1>
+              <p>Enter your personal details and start journey with us</p>
+              <button className="ghost" onClick={handleSignUp}>Sign Up</button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
