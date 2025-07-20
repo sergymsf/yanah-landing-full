@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-// import 'boxicons/css/boxicons.min.css';
+import 'boxicons/css/boxicons.min.css';
 
 export default function LoginPage() {
   useEffect(() => {
@@ -172,7 +172,7 @@ from{
     height: 100%;  
     background: #333;
     color: #fff;
-    border-radius: 150px;
+    border-radius: 20vw;
     z-index: 2;
     transition: ease-in-out 1.8s;
 }
@@ -223,16 +223,38 @@ from{
     cursor: pointer;
 }
 
+.logo-link {
+  position: absolute;
+  top: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99;
+}
+
+.logo-image {
+  height: 60px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.logo-image:hover {
+  transform: scale(1.2);
+}
+
 @media screen and (max-width: 650px) {
     .container {
         margin: 0;
         height: 100vh;
     }
-    
+
     .form-box {
         width: 100%;
         height: 70%;
         bottom: 0;
+    }
+    
+    form{
+        width: 85vw ;
     }
 
     .toggle-box::before {
@@ -240,7 +262,7 @@ from{
         top: -270%;
         width: 100%;
         height: 300%;
-        border-radius: 20vw;
+        border-radius: 90vh;
     }
 
     .container.active .form-box {
@@ -253,11 +275,9 @@ from{
         top: -270%;
         width: 100%;
         height: 300%;
-        border-radius: 20vw;
     }
     
     .container.active .toggle-box::before {
-        boerder-radius: 5vh;
         left: 0;
         top: 70%;
     }
@@ -284,7 +304,7 @@ from{
     .container.active .toggle-panel.toggle-right {
         bottom: 0;
     }
-    
+  }
 @media screen and (max-width: 400px) {
     .form-box {
         padding: 20px;
@@ -294,10 +314,15 @@ from{
         font-size: 30px;
     }
 
-}
+  }
 
 }
       `}</style>
+
+
+      <a href="/" className="logo-link">
+        <img src="src/assets/logo.png" alt="Logo" className="logo-image" />
+      </a>
 
       <div className="container">
         <div className="form-box login">
