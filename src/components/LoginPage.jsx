@@ -37,7 +37,13 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(90deg, #e2e2e2, #c9d6ff);
+    background: linear-gradient(90deg, #f0fdf4, #ffffff);
+}
+
+@media (prefers-color-scheme: dark) {
+  .dark body {
+    background: linear-gradient(90deg, #1f2937, #374151);
+  }
 }
 
 .container {
@@ -170,7 +176,7 @@ from{
     left: -250%;
     width: 300%;
     height: 100%;  
-    background: #333;
+    background: #166534;
     color: #fff;
     border-radius: 20vw;
     z-index: 2;
