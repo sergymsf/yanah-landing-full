@@ -44,6 +44,14 @@ body {
   .dark body {
     background: linear-gradient(90deg, #1f2937, #374151);
   }
+
+  .dark .toggle-box::before {
+    background: rgb(55 65 81 / var(--tw-bg-opacity, 1));
+  }
+
+  .dark .form-box {
+    background: rgb(235 218 188 / var(--tw-text-opacity, 1));
+    
 }
 
 .container {
@@ -309,6 +317,10 @@ from{
 
     .container.active .toggle-panel.toggle-right {
         bottom: 0;
+    }
+
+    .logo-image {
+      display: none;
     }
   }
 @media screen and (max-width: 400px) {
