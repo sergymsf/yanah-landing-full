@@ -1,10 +1,8 @@
 import React from 'react';
 import LoginPage from './components/LoginPage';
 import LandingPage from './components/LandingPage';
-import { useEffect } from "react";
-import { db } from "./firebase";
-import { collection, getDocs } from "firebase/firestore";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect } from "react";
 
 function App() {
   return (

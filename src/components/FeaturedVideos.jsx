@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { db } from "../firebase";
-import { collection, getDocs } from "firebase/firestore";
 
 function extractVideoId(url) {
   try {
